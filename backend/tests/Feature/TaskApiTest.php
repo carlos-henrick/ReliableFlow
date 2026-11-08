@@ -16,7 +16,11 @@ class TaskApiTest extends TestCase
     {
         Queue::fake();
         $response = $this->postJson('/api/tasks', ['type' => 'send_notification', 'payload' => ['message' => 'Test notification']]);
-        $response->assertCreated()->assertJsonPath('type', 'send_notification')->assertJsonPath('payload.message', 'Test notification');
+        $response->assertCreated()
+            ->assertJsonPath('type', 'send_notification')
+            ->assertJsonPath('payload.message', 'Test notification')
+            ->assertJsonPath('status', 'pending')
+            ->assertJsonPath('attempts', 0);
         $this->assertDatabaseHas('tasks', ['id' => $response->json('id'), 'type' => 'send_notification', 'status' => 'pending', 'attempts' => 0]);
         Queue::assertPushed(ProcessTask::class);
     }
@@ -26,6 +30,20 @@ class TaskApiTest extends TestCase
         Queue::fake();
         $response = $this->postJson('/api/tasks', ['type' => '', 'payload' => 'invalid']);
         $response->assertUnprocessable()->assertJsonValidationErrors(['type', 'payload']);
+        $this->assertDatabaseCount('tasks', 0);
+        Queue::assertNothingPushed();
+    }
+
+    public function test_it_rejects_unsupported_task_types_without_creating_or_queueing_a_task(): void
+    {
+        Queue::fake();
+
+        $response = $this->postJson('/api/tasks', [
+            'type' => 'unsupported_type',
+            'payload' => ['message' => 'Unsupported notification'],
+        ]);
+
+        $response->assertUnprocessable()->assertJsonValidationErrors(['type']);
         $this->assertDatabaseCount('tasks', 0);
         Queue::assertNothingPushed();
     }

@@ -7,6 +7,7 @@ use App\Jobs\ProcessTask;
 use App\Models\Task;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class TaskController extends Controller
 {
@@ -15,7 +16,7 @@ class TaskController extends Controller
         $request->merge(['idempotency_key' => $request->header('Idempotency-Key')]);
 
         $validated = $request->validate([
-            'type' => ['required', 'string', 'max:100'],
+            'type' => ['required', 'string', 'max:100', Rule::in(Task::SUPPORTED_TYPES)],
             'payload' => ['required', 'array'],
             'idempotency_key' => ['nullable', 'string', 'max:255'],
         ]);
