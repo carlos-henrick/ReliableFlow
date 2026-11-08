@@ -15,6 +15,12 @@ return [
 
     'default' => env('QUEUE_CONNECTION', 'database'),
 
+    'worker_timeout' => (int) env('QUEUE_WORKER_TIMEOUT', 60),
+
+    'task_processing_lease_seconds' => (int) env('TASK_PROCESSING_LEASE_SECONDS', 75),
+
+    'task_recovery_pending_after_seconds' => (int) env('TASK_RECOVERY_PENDING_AFTER_SECONDS', 300),
+
     /*
     |--------------------------------------------------------------------------
     | Queue Connections
