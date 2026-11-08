@@ -1,13 +1,18 @@
 <?php
 
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class Task extends Model
 {
     use HasUuids;
-    protected $fillable = ['type', 'payload', 'status', 'attempts', 'result', 'last_error', 'completed_at',];
+
+    protected $fillable = ['type', 'payload', 'status', 'attempts', 'result', 'last_error', 'completed_at', 'idempotency_key'];
+
+    protected $hidden = ['idempotency_key'];
+
     protected function casts(): array
     {
         return [
